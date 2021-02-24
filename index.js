@@ -2,6 +2,7 @@ const express = require('express')
 const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 let DBURI = `mongodb+srv://dbusr:dbpwd@cluster0.lbqyk.mongodb.net/mySecondDatabase?retryWrites=true&w=majority`
 app.use(bodyParser.json());
 mongoose.connect(DBURI, {
@@ -13,14 +14,21 @@ mongoose.connect(DBURI, {
     if (err)
         console.error(err)
 });
+
+let pwd = "abcd"
 let connection = mongoose.connection
 const User = require('./models/User')
 
 connection.on('connected', async () => {
     console.log("DB Connected")
+    // console.log(await User.find({}))
     // let User = connection.collection("users")
-    // let users = await User.find()
+    // let users = await User.findOne({})
     // console.log(users)
+    // let newUser = await User.insert({ name: "baskar", description: "Something" })
+    // console.log(newUser)
+    // let newUsers = await User.insertMany([{ name: "Bob Hary", description: "Something" }, { fullName: "Bob Hary" }, { firstName: "Bob", lastName: "Hary" }])
+    // console.log(newUsers)
     // let users = await User.find({})
     // console.log(users)
     // let newUser = await new User({ username: "Bavya", password: "personal", name: "someone", pwd: "lio" }).save()
@@ -38,7 +46,9 @@ app.post('/signup', async function (req, res) {
         let userExists = await User.findOne({ email: email.toLowerCase() })
         if (userExists) return res.status(400).send({ message: "User already exists." });
     }
-    let user = await User.create({ email: email.toLowerCase(), firstName, lastName, password })
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(password, salt);
+    let user = await User.create({ email: email.toLowerCase(), firstName, lastName, password: hash })
     res.send(user);
 })
 app.post('/login', async function (req, res) {
@@ -46,12 +56,14 @@ app.post('/login', async function (req, res) {
     if (!email || !password) {
         return res.status(400).send({ message: "Required fields are missing." });
     }
+
     let userExists = await User.findOne({ email: email.toLowerCase() })
-    if (userExists) {
+    let isMatch = bcrypt.compareSync(password, userExists.password); // true
+
+    if (userExists && isMatch) {
         res.status(200).send(userExists)
     }
     return res.status(401).send({ message: "Invalid username/password" })
-
 })
 
 app.post('/:param', function (req, res) {
@@ -60,7 +72,6 @@ app.post('/:param', function (req, res) {
 app.get('/', function (req, res) {
     res.json({ data: "" })
 })
-
 
 app.listen(5000, () => {
     console.log("listening pon port http://localhost:5000")

@@ -8,7 +8,7 @@ const userSchema = new Schema({
     password: { type: String },
     phoneNumber: { type: String },
 }, {
-    collection: "User"
+    collections: "users"
 })
 
 const User = mongoose.model('User', userSchema);
