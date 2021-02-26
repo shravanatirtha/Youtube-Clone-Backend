@@ -3,8 +3,11 @@ const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const axios = require('axios');
+const cors = require('cors');
 let DBURI = `mongodb+srv://dbusr:dbpwd@cluster0.lbqyk.mongodb.net/mySecondDatabase?retryWrites=true&w=majority`
 app.use(bodyParser.json());
+app.use(cors())
 mongoose.connect(DBURI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -15,8 +18,8 @@ mongoose.connect(DBURI, {
         console.error(err)
 });
 
-let pwd = "abcd"
-let connection = mongoose.connection
+const API_KEY = "AIzaSyBBBMxyRen33kyBrXZVBM2UE49E8cgrwSg"
+let connection = mongoose.connection;
 const User = require('./models/User')
 
 connection.on('connected', async () => {
@@ -36,6 +39,14 @@ connection.on('connected', async () => {
 })
 
 
+app.get("/videos", async function (req, res) {
+    try {
+        let { data } = await axios.get(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&q=jesus`)
+        return res.send(data);
+    } catch (err) {
+        console.log(err)
+    }
+})
 
 app.post('/signup', async function (req, res) {
     const { email, firstName, lastName, password } = req.body;
