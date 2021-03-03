@@ -2,12 +2,14 @@ const express = require('express')
 const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const axios = require('axios');
 const cors = require('cors');
 let DBURI = `mongodb+srv://dbusr:dbpwd@cluster0.lbqyk.mongodb.net/mySecondDatabase?retryWrites=true&w=majority`
 app.use(bodyParser.json());
 app.use(cors())
+app.set('view engine', 'ejs');
+
 mongoose.connect(DBURI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -38,10 +40,22 @@ connection.on('connected', async () => {
     // console.log(newUser)
 })
 
+app.get("/viewengine", function (req, res) {
+    res.render("index", { title: "Baskaryabase", body: "this the description" })
+})
 
 app.get("/videos", async function (req, res) {
     try {
-        let { data } = await axios.get(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&q=jesus`)
+        let { data } = await axios.get(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&q=jesus&part=snippet`)
+        return res.send(data);
+    } catch (err) {
+        console.log(err)
+    }
+})
+
+app.get("/search/:keyword", async function (req, res) {
+    try {
+        let { data } = await axios.get(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&q=${req.params.keyword}&part=snippet`)
         return res.send(data);
     } catch (err) {
         console.log(err)
