@@ -1,14 +1,16 @@
-const express = require('express')
+import express from 'express'
 const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const axios = require('axios');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 let DBURI = `mongodb+srv://dbusr:dbpwd@cluster0.lbqyk.mongodb.net/mySecondDatabase?retryWrites=true&w=majority`
 app.use(bodyParser.json());
 app.use(cors())
 app.set('view engine', 'ejs');
+const SECRET = "THIS IS MY SECRET";
 
 mongoose.connect(DBURI, {
     useNewUrlParser: true,
@@ -86,7 +88,10 @@ app.post('/login', async function (req, res) {
     let isMatch = bcrypt.compareSync(password, userExists.password); // true
 
     if (userExists && isMatch) {
-        res.status(200).send(userExists)
+        return res.status(200).send({
+            ...userExists._doc,
+            token: jwt.sign({ _id: userExists._id }, SECRET)
+        })
     }
     return res.status(401).send({ message: "Invalid username/password" })
 })
