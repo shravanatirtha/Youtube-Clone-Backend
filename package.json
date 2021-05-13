@@ -1,6 +1,8 @@
 {
-  "name": "simpleexpressapp",
+  
+  "name": "youtubeclonebackend",
   "version": "1.0.0",
+
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,8 +10,8 @@
     "dev": "babel-node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Baskaryabase",
-  "license": "ISC",
+  "author": "Shravana Tirtha",
+  "license": "MIT",
   "dependencies": {
     "@babel/cli": "^7.13.0",
     "@babel/core": "^7.13.8",
